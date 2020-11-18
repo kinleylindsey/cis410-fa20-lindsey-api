@@ -1,11 +1,11 @@
 const sql = require('mssql')
-const lindseyConfig = require('./config.js')
+const kinleyConfig = require('./config.js')
 
 const config = {
-    user: lindseyConfig.DB.user,
-    password: lindseyConfig.DB.password,
-    server: lindseyConfig.DB.server,
-    database: lindseyConfig.DB.database,
+    user: kinleyConfig.DB.user,
+    password: kinleyConfig.DB.password,
+    server: kinleyConfig.DB.server,
+    database: kinleyConfig.DB.database,
 }
 
 
