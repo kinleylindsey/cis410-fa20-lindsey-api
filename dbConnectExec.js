@@ -1,11 +1,11 @@
 const sql = require('mssql')
-const kinleyConfig = require('./config.js')
+const lindseyConfig = require('./config.js')
 
 const config = {
-    user: kinleyConfig.DB.user,
-    password: kinleyConfig.DB.password,
-    server: kinleyConfig.DB.server,
-    database: kinleyConfig.DB.database,
+    user: lindseyConfig.DB.user,
+    password: lindseyConfig.DB.password,
+    server: lindseyConfig.DB.server,
+    database: lindseyConfig.DB.database,
 }
 
 
@@ -16,6 +16,6 @@ async function executeQuery(aQuery){
     return result.recordset
 }  
 
-executeQuery()
+// executeQuery()
 
 module.exports = {executeQuery: executeQuery}

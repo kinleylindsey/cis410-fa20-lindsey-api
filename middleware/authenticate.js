@@ -8,7 +8,7 @@ const auth = async(req, res,next)=>{
     // console.log(req.header('Authorization'))
     try{
 
-        //1. decode toker
+        //1. decode token
 
         let myToken = req.header('Authorization').replace('Bearer ', '')
         // console.log(myToken)
@@ -20,7 +20,7 @@ const auth = async(req, res,next)=>{
         console.log(contactPK)
         
         //2. compare token with db token
-        let query = `SELECT ContactPK, NameFirst, NameLast, Email FROM Contact WHERE ContactPK = ${contactPK} and Token = ${myToken}`
+        let query = `SELECT ContactPK, NameFirst, NameLast, Email FROM Contacts WHERE ContactPK = ${contactPK} and Token = '${myToken}'`
 
         let returnedUser = await db.executeQuery(query)
         // console.log(returnedUser)
@@ -30,10 +30,10 @@ const auth = async(req, res,next)=>{
             req.contact = returnedUser[0];
             next()
         }
-        else{res.status(401).send('Authentication failed.')}
+        else{res.status(401).send('Authentication failed. User')}
 
     }catch(myError){
-        res.status(401).send("Authentication failed.")
+        res.status(401).send(myError)
     }
 }
 

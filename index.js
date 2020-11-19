@@ -1,5 +1,6 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 const cors = require('cors')
 
 const db = require('./dbConnectExec.js')
@@ -12,7 +13,7 @@ app.use(express.json())
 app.use(cors())
 
 app.post('/contacts/logout', auth, (req,res)=>{
-    var query = `UPDATE Contact
+    var query = `UPDATE Contacts
     SET Token = NULL
     WHERE ContactPK = ${req.contact.ContactPK}`
 
@@ -24,7 +25,6 @@ app.post('/contacts/logout', auth, (req,res)=>{
     })
 })
 
-// 7.
 // app.get('/reviews/me', auth, async(req,res)=>{
 //     let contactPK = req.contact.ContactPK;
 
@@ -61,7 +61,7 @@ app.post("/contacts/login", async (req,res)=>{
 
     //1. check that user email exists in db
     var query = `SELECT *
-    FROM Contact
+    FROM Contacts
     WHERE Email = '${email}'`
 
     
@@ -95,7 +95,7 @@ app.post("/contacts/login", async (req,res)=>{
         // console.log(token)
     
         //4. save the token in db and send token and user info back to user
-        let setTokenQuery = `UPDATE Contact
+        let setTokenQuery = `UPDATE Contacts
         SET Token = '${token}'
         WHERE ContactPK = ${user.ContactPK}`
     
@@ -128,27 +128,28 @@ app.post("/contacts/login", async (req,res)=>{
         var email = req.body.email;
         var password = req.body.password;
     
-        if(!nameFirst || !nameLast || !Email || !Password){
+        if(!nameFirst || !nameLast || !email || !password){
             return res.status(400).send("bad request")
         }
     
         nameFirst = nameFirst.replace("'","''")
         nameLast = nameLast.replace("'","''")
     
-        var emailCheckQuery = `SELECT email
-        FROM contact
-        WHERE email = '${email}'`
+        var emailCheckQuery = `SELECT Email
+        FROM Contacts
+        WHERE Email = '${email}'`
     
         var existingUser = await db.executeQuery(emailCheckQuery)
     
         // console.log("existing user", existingUser)
         if(existingUser[0]){
+            console.log(existingUser);
             return res.status(409).send('Please enter a different email.')
         }
     
         var hashedPassword = bcrypt.hashSync(password)
     
-        var insertQuery = `INSERT INTO contact(NameFirst,NameLast,Email,Password)
+        var insertQuery = `INSERT INTO Contacts (NameFirst,NameLast,Email,Password)
         VALUES('${nameFirst}','${nameLast}','${email}','${hashedPassword}')`
     
         db.executeQuery(insertQuery)
@@ -157,6 +158,64 @@ app.post("/contacts/login", async (req,res)=>{
                 console.log("error in POST /contacts",err)
                 res.status(500).send()
             })
+    })
+
+    //6.
+    app.post("/reviews", auth, async (req,res)=>{
+
+        try{ 
+            var movieFK = req.body.movieFK;
+            var summary = req.body.summary;
+            var rating = req.body.rating;
+        
+            if(!movieFK || !summary || !rating){res.status(400).send("bad request")}
+    
+            summary = summary.replace("'","''")
+        
+            // console.log("here is the contact in /reviews",req.contact)
+            // res.send("here is your response")
+    
+            let insertQuery = `INSERT INTO Review(Summary, Rating, MovieFK, ContactFK)
+            OUTPUT inserted.ReviewPK, inserted.Summary, inserted.Rating, inserted.MovieFK
+            VALUES('${summary}','${rating}','${movieFK}', ${req.contact.ContactPK})`
+    
+            let insertedReview = await db.executeQuery(insertQuery)
+    
+            // console.log(insertedReview)
+            res.status(201).send(insertedReview[0])
+        }
+        catch(error){
+            console.log("error in POST /review", error);
+            res.status(500).send()
+        }
+    })
+
+    //7.
+    app.get('/example7', auth, (req,res)=>{
+        var query = `SELECT * FROM Camera LEFT JOIN Contacts ON Contacts.ContactPK = Camera.ContactFK WHERE Contacts.ContactPK = ${req.contact.ContactPK}`
+        db.executeQuery(query)
+        .then((result)=>{
+            res.status(200).send(result)
+        })
+        .catch((err)=>{
+            console.log(err);
+            res.status(500).send()
+        })
+        // res.send(req.contact)
+    })
+
+    app.get('/cameras', (req,res)=>{
+        var query = `SELECT *
+        FROM Camera`
+        db.executeQuery(query)
+        .then((result)=>{
+            res.status(200).send(result)
+        })
+        .catch((err)=>{
+            console.log(err);
+            res.status(500).send()
+        })
+        // res.send(req.contact)
     })
 
     app.listen(5000,()=>{console.log(`app is running on port 5000`)})
