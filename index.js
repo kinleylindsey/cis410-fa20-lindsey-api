@@ -161,23 +161,22 @@ app.post("/contacts/login", async (req,res)=>{
     })
 
     //6.
-    app.post("/reviews", async (req,res)=>{
+    app.post("/camera", async (req,res)=>{
 
         try{ 
-            var cameraFK = req.body.CameraFK;
-            var summary = req.body.Summary;
-            var rating = req.body.Rating;
+            var cameraPK = req.body.cameraPK;
+            var brand = req.body.brand;
+            var lens = req.body.lens;
+            var memoryCard = req.body.memoryCard;
         
-            if(!cameraFK || !summary || !rating){res.status(400).send("bad request")}
-    
-            summary = summary.replace("'","''")
+            if(!cameraPK || !brand || !lens || !memoryCard){res.status(400).send("bad request")}
         
             // console.log("here is the contact in /reviews",req.contact)
             // res.send("here is your response")
     
-            let insertQuery = `INSERT INTO Reviews(Summary, Rating, CameraFK, ContactFK)
-            OUTPUT inserted.ReviewsPK, inserted.Summary, inserted.Rating, inserted.CameraFK
-            VALUES('${summary}','${rating}','${cameraFK}', ${req.contact.ContactPK})`
+            let insertQuery = `INSERT INTO Camera(CameraPK, Brand, Lens, MemoryCard, ContactFK)
+            OUTPUT inserted.CameraPK, inserted.Brand, inserted.Lens, inserted.MemoryCard
+            VALUES('${cameraPK}','${brand}', ${lens}, ${memoryCard}, ${req.contact.ContactPK})`
     
             let insertedReview = await db.executeQuery(insertQuery)
     
@@ -185,7 +184,7 @@ app.post("/contacts/login", async (req,res)=>{
             res.status(201).send(insertedReview[0])
         }
         catch(error){
-            console.log("error in POST /reviews", error);
+            console.log("error in POST /camera", error);
             res.status(500).send()
         }
     })
@@ -204,6 +203,7 @@ app.post("/contacts/login", async (req,res)=>{
         // res.send(req.contact)
     })
 
+    //1.
     app.get('/cameras', (req,res)=>{
         var query = `SELECT *
         FROM Camera`
@@ -218,6 +218,7 @@ app.post("/contacts/login", async (req,res)=>{
         // res.send(req.contact)
     })
 
+    //2.
     app.get("/cameras/:pk", (req, res)=>{
         var pk = req.params.pk
         // console.log("my PK:" , pk)
@@ -226,21 +227,22 @@ app.post("/contacts/login", async (req,res)=>{
         FROM Camera
         LEFT JOIN CameraType
         ON CameraType.TypePK = Camera.TypeFK
-        WHERE moviePK = ${pk}`
+        WHERE CameraPK = ${pk}`
     
         db.executeQuery(myQuery)
-            .then((movies)=>{
+            .then((cameras)=>{
                 // console.log("Movies: ", movies)
     
-                if(movies[0]){
-                    res.send(movies[0])
+                if(cameras[0]){
+                    res.send(cameras[0])
                 }else{res.status(404).send('bad request')}
             })
             .catch((err)=>{
-                console.log("Error in /movies/pk", err)
+                console.log("Error in /cameras/pk", err)
                 res.status(500).send()
             })
     })
 
-    app.listen(5000,()=>{console.log(`app is running on port 5000`)})
+const PORT = process.env.PORT || 5000
+app.listen(PORT,()=>{console.log(`app is running on port ${PORT}`)})
 

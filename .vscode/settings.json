@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/5a6b42de-e4d1-4ab0-8ac4-d7f0d7bc1127/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/cis410-fa20-lindsey2-api",
+    "appService.deploySubpath": "."
+}
