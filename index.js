@@ -161,23 +161,23 @@ app.post("/contacts/login", async (req,res)=>{
     })
 
     //6.
-    app.post("/reviews", auth, async (req,res)=>{
+    app.post("/reviews", async (req,res)=>{
 
         try{ 
-            var movieFK = req.body.movieFK;
-            var summary = req.body.summary;
-            var rating = req.body.rating;
+            var cameraFK = req.body.CameraFK;
+            var summary = req.body.Summary;
+            var rating = req.body.Rating;
         
-            if(!movieFK || !summary || !rating){res.status(400).send("bad request")}
+            if(!cameraFK || !summary || !rating){res.status(400).send("bad request")}
     
             summary = summary.replace("'","''")
         
             // console.log("here is the contact in /reviews",req.contact)
             // res.send("here is your response")
     
-            let insertQuery = `INSERT INTO Review(Summary, Rating, MovieFK, ContactFK)
-            OUTPUT inserted.ReviewPK, inserted.Summary, inserted.Rating, inserted.MovieFK
-            VALUES('${summary}','${rating}','${movieFK}', ${req.contact.ContactPK})`
+            let insertQuery = `INSERT INTO Reviews(Summary, Rating, CameraFK, ContactFK)
+            OUTPUT inserted.ReviewsPK, inserted.Summary, inserted.Rating, inserted.CameraFK
+            VALUES('${summary}','${rating}','${cameraFK}', ${req.contact.ContactPK})`
     
             let insertedReview = await db.executeQuery(insertQuery)
     
@@ -185,13 +185,13 @@ app.post("/contacts/login", async (req,res)=>{
             res.status(201).send(insertedReview[0])
         }
         catch(error){
-            console.log("error in POST /review", error);
+            console.log("error in POST /reviews", error);
             res.status(500).send()
         }
     })
 
     //7.
-    app.get('/example7', auth, (req,res)=>{
+    app.get('/records', auth, (req,res)=>{
         var query = `SELECT * FROM Camera LEFT JOIN Contacts ON Contacts.ContactPK = Camera.ContactFK WHERE Contacts.ContactPK = ${req.contact.ContactPK}`
         db.executeQuery(query)
         .then((result)=>{
@@ -216,6 +216,30 @@ app.post("/contacts/login", async (req,res)=>{
             res.status(500).send()
         })
         // res.send(req.contact)
+    })
+
+    app.get("/cameras/:pk", (req, res)=>{
+        var pk = req.params.pk
+        // console.log("my PK:" , pk)
+    
+        var myQuery = `SELECT *
+        FROM Camera
+        LEFT JOIN CameraType
+        ON CameraType.TypePK = Camera.TypeFK
+        WHERE moviePK = ${pk}`
+    
+        db.executeQuery(myQuery)
+            .then((movies)=>{
+                // console.log("Movies: ", movies)
+    
+                if(movies[0]){
+                    res.send(movies[0])
+                }else{res.status(404).send('bad request')}
+            })
+            .catch((err)=>{
+                console.log("Error in /movies/pk", err)
+                res.status(500).send()
+            })
     })
 
     app.listen(5000,()=>{console.log(`app is running on port 5000`)})

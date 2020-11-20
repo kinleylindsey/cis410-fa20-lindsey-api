@@ -30,10 +30,10 @@ const auth = async(req, res,next)=>{
             req.contact = returnedUser[0];
             next()
         }
-        else{res.status(401).send('Authentication failed. User')}
+        else{res.status(401).send('Authentication failed.')}
 
     }catch(myError){
-        res.status(401).send(myError)
+        res.status(401).send('Authentication failed.')
     }
 }
 
