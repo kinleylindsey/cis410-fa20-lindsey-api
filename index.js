@@ -161,7 +161,7 @@ app.post("/contacts/login", async (req,res)=>{
     })
 
     //6.
-    app.post("/camera", async (req,res)=>{
+    app.post("/camera", async, auth, (req,res)=>{
 
         try{ 
             var cameraPK = req.body.cameraPK;
